@@ -329,7 +329,7 @@
                 let bgColor = laptop.platform === 'Tokopedia' ? (laptop.isOfficial ? 'ab1fe4' : '42B549') : (laptop.isOfficial ? 'D0011B' : 'EE4D2D');
                 let text = laptop.platform === 'Tokopedia' ? 'TKP' : 'SHP';
                 let platformText = laptop.platform + (laptop.isOfficial ? ' Mall' : '');
-                platformContainer.innerHTML = `<img src="https://placehold.co/100x35/${bgColor}/FFFFFF?text=${text}&font=roboto" alt="${platformText} Logo" class="h-full object-contain rounded-md"><span class="font-semibold text-gray-300 text-sm ml-2">${platformText}</span>`;
+                platformContainer.innerHTML = `<img src="https://placehold.co/50x35/${bgColor}/FFFFFF?text=${text}&font=roboto" alt="${platformText} Logo" class="h-full object-contain rounded-md"><span class="font-semibold text-gray-300 text-sm ml-2">${platformText}</span>`;
 
                 const specContainer = cardEl.querySelector('.spec-container');
                 specContainer.innerHTML = '';

@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asisten Pilih Laptop</title>
+    
+    <!-- Favicon untuk tab browser -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💻</text></svg>">
+
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons (Vanilla JS version) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Custom CSS for animations and premium look -->
+    <style>
+        @keyframes fade-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fade-in-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); } 20%, 40%, 60%, 80% { transform: translateX(5px); } }
+        .animate-fade-in { animation: fade-in 0.5s ease-out forwards; }
+        .animate-fade-in-up { animation: fade-in-up 0.5s ease-out forwards; }
+        .animate-shake { animation: shake 0.5s ease-in-out forwards; }
+        /* Custom scrollbar for modals */
+        .modal-content::-webkit-scrollbar { width: 8px; }
+        .modal-content::-webkit-scrollbar-track { background: #2d3748; }
+        .modal-content::-webkit-scrollbar-thumb { background: #4a5568; border-radius: 4px; }
+        .modal-content::-webkit-scrollbar-thumb:hover { background: #718096; }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen font-sans bg-gradient-to-br from-gray-900 to-slate-800">
+
+    <!-- Main Application Container -->
+    <div id="app-container" class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+        
+        <!-- Header -->
+        <header class="flex flex-col sm:flex-row justify-between items-center mb-8">
+            <div>
+                <h1 class="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-teal-300">Asisten Pilih Laptop</h1>
+                <p class="text-gray-400 mt-1">Database Cloud untuk Keputusan Pembelian Anda</p>
+            </div>
+            <div id="auth-section">
+                <!-- Login/Logout buttons will be rendered here by JS -->
+            </div>
+        </header>
+
+        <!-- Main Content (Login Screen or Laptop List) -->
+        <div id="main-content">
+            <!-- Content is rendered here by JS -->
+        </div>
+
+        <!-- Comparison Bar (initially hidden) -->
+        <div id="comparison-bar" class="fixed bottom-0 left-0 right-0 bg-gray-800/80 backdrop-blur-sm p-4 shadow-lg-top z-40 border-t border-gray-700 animate-fade-in-up hidden">
+            <div class="max-w-7xl mx-auto flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <p class="font-bold text-lg">Terpilih: <span id="compare-count">0</span> Laptop</p>
+                    <div id="compare-avatars" class="flex -space-x-2"></div>
+                </div>
+                <button id="compare-now-btn" class="flex items-center bg-gradient-to-r from-green-600 to-emerald-500 text-white font-bold py-2 px-4 rounded-lg shadow-lg transition-all disabled:from-gray-500 disabled:to-gray-600 hover:shadow-green-400/50">
+                    Bandingkan Sekarang
+                    <i data-lucide="chevrons-right" class="ml-1"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals Container (initially hidden) -->
+    <div id="modal-container"></div>
+
+    <!-- TEMPLATES (will be cloned by JS) -->
+    <template id="auth-screen-template">
+        <div class="flex items-center justify-center min-h-[60vh]">
+            <div class="w-full max-w-md space-y-8 bg-gray-800/50 backdrop-blur-sm p-10 rounded-2xl shadow-2xl border border-gray-700 transition-all duration-500 animate-fade-in">
+                <div><h2 id="auth-title" class="mt-6 text-center text-3xl font-bold tracking-tight text-white">Login ke Akun Anda</h2></div>
+                <form id="auth-form" class="mt-8 space-y-6">
+                    <div class="rounded-md shadow-sm -space-y-px">
+                        <div><input id="email-address" name="email" type="email" autocomplete="email" required class="relative block w-full appearance-none rounded-md border border-gray-700 bg-gray-900 px-3 py-3 text-white placeholder-gray-500 focus:z-10 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm transition" placeholder="Alamat Email" /></div>
+                        <div class="pt-4"><input id="password" name="password" type="password" autocomplete="current-password" required class="relative block w-full appearance-none rounded-md border border-gray-700 bg-gray-900 px-3 py-3 text-white placeholder-gray-500 focus:z-10 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm transition" placeholder="Password (min. 6 karakter)" /></div>
+                    </div>
+                    <p id="auth-error" class="text-sm text-red-400 text-center"></p>
+                    <div><button id="auth-submit-btn" type="submit" class="group relative flex w-full justify-center rounded-md border border-transparent bg-gradient-to-r from-blue-600 to-teal-500 py-3 px-4 text-sm font-medium text-white hover:from-blue-700 hover:to-teal-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800 disabled:from-gray-500 disabled:to-gray-600 transition-all duration-300">Login</button></div>
+                </form>
+                <div class="text-center"><button id="auth-toggle-btn" class="text-sm text-blue-400 hover:underline">Belum punya akun? Daftar di sini</button></div>
+            </div>
+        </div>
+    </template>
+
+    <template id="laptop-list-template">
+        <div>
+            <div class="flex justify-end mb-4">
+                <button id="add-laptop-btn" class="flex items-center bg-gradient-to-r from-blue-600 to-teal-500 text-white font-bold py-2 px-4 rounded-lg shadow-lg transition-transform transform hover:scale-105 hover:shadow-blue-400/50">
+                    <i data-lucide="plus" class="mr-2"></i>Tambah Laptop
+                </button>
+            </div>
+            <main id="laptops-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-24"></main>
+        </div>
+    </template>
+    
+    <template id="laptop-card-template">
+         <div class="laptop-card bg-gray-800 rounded-xl shadow-lg overflow-hidden transition-all duration-300 flex flex-col border border-transparent hover:border-blue-500/50 hover:shadow-blue-500/20 hover:-translate-y-1 animate-fade-in ring-1 ring-gray-700">
+            <div class="p-5 flex-grow">
+                <div class="flex justify-between items-start">
+                    <h2 class="laptop-nama text-lg font-bold text-gray-100 flex-1 pr-2">Nama Laptop</h2>
+                    <div class="flex space-x-2">
+                        <button class="btn-duplicate text-gray-400 hover:text-green-400 transition-colors" title="Duplikat"><i data-lucide="copy" class="w-4 h-4"></i></button>
+                        <button class="btn-edit text-gray-400 hover:text-blue-400 transition-colors" title="Edit"><i data-lucide="edit" class="w-4 h-4"></i></button>
+                        <button class="btn-delete text-gray-400 hover:text-red-500 transition-colors" title="Hapus"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </div>
+                </div>
+                <div class="platform-display flex items-center my-3 h-6"></div>
+                <div class="spec-container space-y-2 my-4"></div>
+                <div class="flex justify-end items-center mt-4"><a href="#" target="_blank" rel="noopener noreferrer" class="laptop-link text-blue-400 hover:text-blue-300 transition-colors"><i data-lucide="link" class="w-5 h-5"></i></a></div>
+            </div>
+            <div>
+                <div class="bg-gray-700/50 px-5 py-3">
+                    <div class="flex justify-between items-center">
+                        <div><p class="text-xs text-gray-400">Harga Beli</p><p class="laptop-harga-beli font-bold text-lg text-white">Rp0</p></div>
+                        <div class="text-right"><p class="text-xs text-gray-400">Estimasi Jual</p><p class="laptop-harga-jual font-semibold text-gray-300">Rp0</p></div>
+                    </div>
+                    <!-- **BARU**: Bagian Keuntungan -->
+                    <div class="mt-2 text-center border-t border-gray-700 pt-2">
+                         <p class="text-xs text-gray-400">Estimasi Keuntungan</p>
+                         <p class="laptop-keuntungan font-bold text-lg">Rp0</p>
+                    </div>
+                </div>
+                <button class="btn-compare w-full text-center py-2 text-sm font-bold transition-colors bg-gray-600/50 hover:bg-gray-600 text-gray-200">Bandingkan</button>
+            </div>
+        </div>
+    </template>
+    
+    <template id="laptop-modal-template">
+        <div class="modal-backdrop fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center z-50 p-4 animate-fade-in">
+            <div class="modal-content bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col border border-gray-700">
+                <div class="p-6 border-b border-gray-700"><div class="flex justify-between items-center"><h2 id="modal-title" class="text-2xl font-bold text-white">Tambah Laptop Baru</h2><button class="btn-close-modal text-gray-400 hover:text-white transition-colors"><i data-lucide="x" class="w-6 h-6"></i></button></div></div>
+                <div class="p-6 flex-grow overflow-y-auto">
+                    <form id="laptop-form" class="space-y-4">
+                        <input type="hidden" name="id">
+                        <input type="text" name="nama" placeholder="Nama Laptop (e.g., MacBook Pro M3)" class="bg-gray-700 text-white p-2 rounded w-full border border-transparent focus:border-blue-500 focus:ring-0 transition" required/>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4"><select name="platform" class="bg-gray-700 text-white p-2 rounded w-full border border-transparent focus:border-blue-500 focus:ring-0 transition"><option value="Tokopedia">Tokopedia</option><option value="Shopee">Shopee</option></select><input type="text" name="toko" placeholder="Nama Toko / Penjual" class="bg-gray-700 text-white p-2 rounded w-full border border-transparent focus:border-blue-500 focus:ring-0 transition"/></div>
+                        <div class="flex items-center"><input type="checkbox" id="isOfficial" name="isOfficial" class="h-4 w-4 rounded bg-gray-700 border-gray-600 text-blue-600 focus:ring-blue-500"/><label for="isOfficial" class="ml-2 text-sm text-gray-300">Official Store / Mall</label></div>
+                        <input type="text" name="processor" placeholder="Prosesor (e.g., Apple M3 Pro)" class="bg-gray-700 text-white p-2 rounded w-full border border-transparent focus:border-blue-500 focus:ring-0 transition" required/>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4"><input type="number" name="ram" placeholder="RAM (GB)" class="bg-gray-700 text-white p-2 rounded w-full border border-transparent focus:border-blue-500 focus:ring-0 transition" required/><input type="number" name="storageSize" placeholder="Penyimpanan (GB)" class="bg-gray-700 text-white p-2 rounded w-full border border-transparent focus:border-blue-500 focus:ring-0 transition" required/><select name="storageType" class="bg-gray-700 text-white p-2 rounded w-full border border-transparent focus:border-blue-500 focus:ring-0 transition"><option value="SSD">SSD</option><option value="HDD">HDD</option></select></div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4"><input type="number" name="hargaBeli" placeholder="Harga Beli (Rp)" class="bg-gray-700 text-white p-2 rounded w-full border border-transparent focus:border-blue-500 focus:ring-0 transition" required/><input type="number" name="hargaJual" placeholder="Estimasi Harga Jual (Rp)" class="bg-gray-700 text-white p-2 rounded w-full border border-transparent focus:border-blue-500 focus:ring-0 transition" /></div>
+                        <input type="text" name="pengiriman" placeholder="Info Pengiriman (e.g., Gratis Ongkir)" class="bg-gray-700 text-white p-2 rounded w-full border border-transparent focus:border-blue-500 focus:ring-0 transition" /><input type="url" name="link" placeholder="Link Produk" class="bg-gray-700 text-white p-2 rounded w-full border border-transparent focus:border-blue-500 focus:ring-0 transition" />
+                        <div class="flex items-center"><input type="checkbox" id="antigores" name="antigores" class="h-4 w-4 rounded bg-gray-700 border-gray-600 text-blue-600 focus:ring-blue-500"/><label for="antigores" class="ml-2 text-sm text-gray-300">Sudah termasuk antigores?</label></div>
+                    </form>
+                </div>
+                <div class="p-6 border-t border-gray-700 flex justify-end space-x-4"><button type="button" class="btn-close-modal py-2 px-4 bg-gray-600 hover:bg-gray-500 rounded-lg font-semibold transition-colors">Batal</button><button type="submit" form="laptop-form" class="py-2 px-4 bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600 rounded-lg font-bold text-white transition-all">Simpan</button></div>
+            </div>
+        </div>
+    </template>
+    
+    <template id="comparison-modal-template">
+        <div class="modal-backdrop fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center z-50 p-4 animate-fade-in">
+            <div class="bg-gray-800 rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] flex flex-col border border-gray-700">
+                <div class="p-6 border-b border-gray-700"><div class="flex justify-between items-center"><h2 class="text-3xl font-bold text-white">Perbandingan Laptop</h2><button class="btn-close-modal text-gray-400 hover:text-white transition-colors"><i data-lucide="x" class="w-7 h-7"></i></button></div></div>
+                <div class="overflow-y-auto p-6">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead id="comparison-head"></thead>
+                            <tbody id="comparison-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-analytics.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyDkLvfUUaGn_9Y9mTNzzU8tOc6QwobMdp8", authDomain: "laptop-decision.firebaseapp.com", projectId: "laptop-decision", storageBucket: "laptop-decision.appspot.com", messagingSenderId: "273491323632", appId: "1:273491323632:web:c26fe2199d74a4362f3035", measurementId: "G-J088ES5N2E" };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const analytics = getAnalytics(app);
+
+        let laptops = [];
+        let laptopsToCompare = [];
+        let currentUser = null;
+        let unsubscribeSnapshot = () => {};
+
+        const mainContent = document.getElementById('main-content');
+        const authSection = document.getElementById('auth-section');
+        const comparisonBar = document.getElementById('comparison-bar');
+        const compareCountEl = document.getElementById('compare-count');
+        const compareAvatarsEl = document.getElementById('compare-avatars');
+        const compareNowBtn = document.getElementById('compare-now-btn');
+        const modalContainer = document.getElementById('modal-container');
+
+        const handleSaveLaptop = async (laptopData) => {
+            if (!currentUser) return;
+            const dataToSave = { ...laptopData };
+            dataToSave.ram = parseInt(dataToSave.ram) || 0;
+            dataToSave.storageSize = parseInt(dataToSave.storageSize) || 0;
+            dataToSave.hargaBeli = parseInt(dataToSave.hargaBeli) || 0;
+            dataToSave.hargaJual = parseInt(dataToSave.hargaJual) || 0;
+            dataToSave.lastUpdated = serverTimestamp();
+
+            try {
+                if (dataToSave.id) {
+                    const docRef = doc(db, 'users', currentUser.uid, 'laptops', dataToSave.id);
+                    delete dataToSave.id;
+                    await updateDoc(docRef, dataToSave);
+                } else {
+                    delete dataToSave.id;
+                    const collectionRef = collection(db, 'users', currentUser.uid, 'laptops');
+                    await addDoc(collectionRef, { ...dataToSave, createdAt: serverTimestamp() });
+                }
+            } catch (error) { console.error("Error saving laptop:", error); }
+        };
+
+        const handleDelete = async (id) => {
+            if (!currentUser) return;
+            const docRef = doc(db, 'users', currentUser.uid, 'laptops', id);
+            await deleteDoc(docRef);
+        };
+
+        const handleDuplicate = async (id) => {
+            if (!currentUser) return;
+            const laptopToDuplicate = laptops.find(laptop => laptop.id === id);
+            if (laptopToDuplicate) {
+                const { id: oldId, ...dataToDuplicate } = laptopToDuplicate;
+                const newLaptopData = { ...dataToDuplicate, nama: `${dataToDuplicate.nama} (Salinan)`, createdAt: serverTimestamp() };
+                const collectionRef = collection(db, 'users', currentUser.uid, 'laptops');
+                await addDoc(collectionRef, newLaptopData);
+            }
+        };
+
+        const renderAuthUI = () => {
+            if (currentUser) {
+                authSection.innerHTML = `<div class="flex items-center space-x-4 mt-4 sm:mt-0"><span class="text-sm text-gray-300 hidden sm:block">${currentUser.email}</span><button id="logout-btn" class="flex items-center bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg transition-transform hover:scale-105"><i data-lucide="log-out" class="mr-2"></i>Logout</button></div>`;
+                document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
+            } else {
+                authSection.innerHTML = '';
+            }
+            lucide.createIcons();
+        };
+        
+        const renderAuthScreen = () => {
+            mainContent.innerHTML = '';
+            const template = document.getElementById('auth-screen-template');
+            const authScreen = template.content.cloneNode(true);
+            mainContent.appendChild(authScreen);
+
+            const authForm = document.getElementById('auth-form');
+            const authTitle = document.getElementById('auth-title');
+            const authSubmitBtn = document.getElementById('auth-submit-btn');
+            const authToggleBtn = document.getElementById('auth-toggle-btn');
+            const authErrorEl = document.getElementById('auth-error');
+            const emailInput = document.getElementById('email-address');
+            const passwordInput = document.getElementById('password');
+            let isLogin = true;
+
+            authToggleBtn.addEventListener('click', () => {
+                isLogin = !isLogin;
+                authTitle.textContent = isLogin ? 'Login ke Akun Anda' : 'Buat Akun Baru';
+                authSubmitBtn.innerHTML = isLogin ? 'Login' : 'Daftar';
+                authToggleBtn.textContent = isLogin ? 'Belum punya akun? Daftar di sini' : 'Sudah punya akun? Login';
+                authErrorEl.textContent = '';
+            });
+
+            authForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                authSubmitBtn.disabled = true;
+                authSubmitBtn.innerHTML = `<i data-lucide="loader-2" class="animate-spin"></i>`;
+                lucide.createIcons();
+                authErrorEl.textContent = '';
+                try {
+                    if (isLogin) {
+                        await signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
+                    } else {
+                        await createUserWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
+                    }
+                } catch (err) {
+                    authErrorEl.textContent = err.message.replace('Firebase: ', '');
+                    authErrorEl.classList.add('animate-shake');
+                    setTimeout(() => authErrorEl.classList.remove('animate-shake'), 500);
+                } finally {
+                    authSubmitBtn.disabled = false;
+                    authSubmitBtn.innerHTML = isLogin ? 'Login' : 'Daftar';
+                }
+            });
+            lucide.createIcons();
+        };
+
+        const renderApp = () => {
+            mainContent.innerHTML = '';
+            const template = document.getElementById('laptop-list-template');
+            const appView = template.content.cloneNode(true);
+            mainContent.appendChild(appView);
+            document.getElementById('add-laptop-btn').addEventListener('click', () => renderModal());
+            renderLaptops();
+        };
+
+        const renderLaptops = () => {
+            const grid = document.getElementById('laptops-grid');
+            grid.innerHTML = '';
+            if (laptops.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-16 bg-gray-800/50 rounded-lg border border-gray-700"><h3 class="text-2xl font-semibold text-gray-300">Belum Ada Data Laptop</h3><p class="text-gray-500 mt-2">Klik tombol "Tambah Laptop" untuk memulai.</p></div>`;
+                return;
+            }
+            laptops.forEach(laptop => {
+                const card = document.getElementById('laptop-card-template').content.cloneNode(true);
+                const cardEl = card.querySelector('.laptop-card');
+                cardEl.dataset.id = laptop.id;
+                cardEl.querySelector('.laptop-nama').textContent = laptop.nama;
+                cardEl.querySelector('.laptop-harga-beli').textContent = `Rp${new Intl.NumberFormat('id-ID').format(laptop.hargaBeli)}`;
+                cardEl.querySelector('.laptop-harga-jual').textContent = `Rp${new Intl.NumberFormat('id-ID').format(laptop.hargaJual)}`;
+                cardEl.querySelector('.laptop-link').href = laptop.link || '#';
+                
+                // **BARU**: Kalkulasi dan tampilkan keuntungan
+                const keuntungan = (laptop.hargaJual || 0) - (laptop.hargaBeli || 0);
+                const keuntunganEl = cardEl.querySelector('.laptop-keuntungan');
+                keuntunganEl.textContent = `Rp${new Intl.NumberFormat('id-ID').format(keuntungan)}`;
+                if (keuntungan >= 0) {
+                    keuntunganEl.classList.add('text-green-400');
+                } else {
+                    keuntunganEl.classList.add('text-red-400');
+                }
+                
+                const platformContainer = cardEl.querySelector('.platform-display');
+                let bgColor = laptop.platform === 'Tokopedia' ? (laptop.isOfficial ? 'ab1fe4' : '42B549') : (laptop.isOfficial ? 'D0011B' : 'EE4D2D');
+                let text = laptop.platform === 'Tokopedia' ? 'TKP' : 'SHP';
+                let platformText = laptop.platform + (laptop.isOfficial ? ' Mall' : '');
+                platformContainer.innerHTML = `<img src="https://placehold.co/100x35/${bgColor}/FFFFFF?text=${text}&font=roboto" alt="${platformText} Logo" class="h-full object-contain rounded-md"><span class="font-semibold text-gray-300 text-sm ml-2">${platformText}</span>`;
+
+                const specContainer = cardEl.querySelector('.spec-container');
+                specContainer.innerHTML = '';
+                const specs = [{ icon: 'store', text: laptop.toko, show: !!laptop.toko, official: laptop.isOfficial },{ icon: 'cpu', text: laptop.processor },{ icon: 'memory-stick', text: `${laptop.ram} GB` },{ icon: 'hard-drive', text: `${laptop.storageSize} GB ${laptop.storageType}` },{ icon: 'shield', text: laptop.antigores ? 'Termasuk' : 'Tidak Termasuk' },{ icon: 'truck', text: laptop.pengiriman },];
+                specs.forEach(spec => {
+                    if (spec.show === false || !spec.text) return;
+                    specContainer.innerHTML += `<div class="flex items-center text-sm text-gray-300"><i data-lucide="${spec.icon}" class="w-4 h-4 text-teal-400"></i><span class="ml-2 truncate">${spec.text}</span>${spec.official ? `<i data-lucide="check-circle-2" class="w-4 h-4 ml-2 text-blue-400"></i>` : ''}</div>`;
+                });
+
+                const compareBtn = cardEl.querySelector('.btn-compare');
+                if (laptopsToCompare.includes(laptop.id)) {
+                    compareBtn.classList.add('bg-blue-600', 'text-white');
+                    compareBtn.classList.remove('bg-gray-600/50', 'hover:bg-gray-600', 'text-gray-200');
+                    compareBtn.textContent = 'Batal Bandingkan';
+                }
+                compareBtn.addEventListener('click', () => toggleCompare(cardEl, laptop.id));
+
+                cardEl.querySelector('.btn-edit').addEventListener('click', () => renderModal(laptop));
+                cardEl.querySelector('.btn-delete').addEventListener('click', () => handleDelete(laptop.id));
+                cardEl.querySelector('.btn-duplicate').addEventListener('click', () => handleDuplicate(laptop.id));
+
+                grid.appendChild(card);
+            });
+            lucide.createIcons();
+        };
+        
+        const renderModal = (laptop = null) => {
+            modalContainer.innerHTML = '';
+            const template = document.getElementById('laptop-modal-template');
+            const modal = template.content.cloneNode(true);
+            modalContainer.appendChild(modal);
+            
+            const form = document.getElementById('laptop-form');
+            if (laptop) {
+                document.getElementById('modal-title').textContent = 'Edit Laptop';
+                Object.keys(laptop).forEach(key => {
+                    const input = form.elements[key];
+                    if (input) {
+                        if (input.type === 'checkbox') input.checked = laptop[key];
+                        else input.value = laptop[key];
+                    }
+                });
+            }
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const formData = new FormData(form);
+                const data = Object.fromEntries(formData.entries());
+                data.isOfficial = !!data.isOfficial;
+                data.antigores = !!data.antigores;
+                handleSaveLaptop(data);
+                closeModal();
+            });
+
+            modalContainer.querySelectorAll('.btn-close-modal').forEach(btn => btn.addEventListener('click', closeModal));
+            lucide.createIcons();
+        };
+        
+        const renderComparisonView = () => {
+            modalContainer.innerHTML = '';
+            const template = document.getElementById('comparison-modal-template');
+            const modal = template.content.cloneNode(true);
+            const head = modal.querySelector('#comparison-head');
+            const body = modal.querySelector('#comparison-body');
+            const laptopsToRender = laptops.filter(l => laptopsToCompare.includes(l.id));
+
+            head.innerHTML = `<tr class="bg-gray-700/50"><th class="p-3 font-semibold text-sm text-gray-300 w-1/5">Spesifikasi</th>${laptopsToRender.map(l => `<th class="p-3 font-bold text-base text-white border-l border-gray-600 text-center">${l.nama}<a href="${l.link || '#'}" target="_blank" rel="noopener noreferrer" class="ml-2 text-blue-400 hover:text-blue-300 inline-block"><i data-lucide="link" class="w-4 h-4"></i></a></th>`).join('')}</tr>`;
+            
+            const fields = [ { key: 'platform', label: 'Platform' }, { key: 'toko', label: 'Toko/Penjual' }, { key: 'isOfficial', label: 'Tipe Toko' }, { key: 'processor', label: 'Prosesor' }, { key: 'ram', label: 'RAM (GB)' }, { key: 'storage', label: 'Penyimpanan' }, { key: 'antigores', label: 'Antigores' }, { key: 'pengiriman', label: 'Pengiriman' }, { key: 'hargaBeli', label: 'Harga Beli' }, { key: 'hargaJual', label: 'Harga Jual' }, { key: 'keuntungan', label: 'Estimasi Keuntungan' } ];
+            
+            body.innerHTML = fields.map(field => `
+                <tr class="border-b border-gray-700">
+                    <td class="p-3 font-semibold text-gray-300">${field.label}</td>
+                    ${laptopsToRender.map(l => {
+                        let value = '';
+                        switch(field.key) {
+                            case 'platform': let bgColor = l.platform === 'Tokopedia' ? (l.isOfficial ? 'ab1fe4' : '42B549') : (l.isOfficial ? 'D0011B' : 'EE4D2D'); let text = l.platform === 'Tokopedia' ? 'TKP' : 'SHP'; let pText = l.platform + (l.isOfficial ? ' Mall' : ''); value = `<div class="flex items-center justify-center space-x-2"><img src="https://placehold.co/100x35/${bgColor}/FFFFFF?text=${text}&font=roboto" alt="${pText} Logo" class="h-8 object-contain rounded-md"></div>`; break;
+                            case 'storage': value = `${l.storageSize || ''} GB ${l.storageType || ''}`; break;
+                            case 'antigores': value = l.antigores ? '✅' : '❌'; break;
+                            case 'isOfficial': value = l.isOfficial ? 'Official Store' : 'Toko Biasa'; break;
+                            case 'hargaBeli': case 'hargaJual': value = `Rp${new Intl.NumberFormat('id-ID').format(l[field.key] || 0)}`; break;
+                            case 'keuntungan': const untung = (l.hargaJual || 0) - (l.hargaBeli || 0); const color = untung >= 0 ? 'text-green-400' : 'text-red-400'; value = `<span class="font-bold ${color}">Rp${new Intl.NumberFormat('id-ID').format(untung)}</span>`; break;
+                            default: value = l[field.key] || '-';
+                        }
+                        return `<td class="p-3 text-gray-100 border-l border-gray-600 text-center">${value}</td>`;
+                    }).join('')}
+                </tr>
+            `).join('');
+
+            modalContainer.appendChild(modal);
+            modalContainer.querySelectorAll('.btn-close-modal').forEach(btn => btn.addEventListener('click', closeModal));
+            lucide.createIcons();
+        };
+
+        const closeModal = () => modalContainer.innerHTML = '';
+        
+        const toggleCompare = (cardEl, id) => {
+            const index = laptopsToCompare.indexOf(id);
+            if (index > -1) {
+                laptopsToCompare.splice(index, 1);
+            } else if (laptopsToCompare.length < 4) {
+                laptopsToCompare.push(id);
+            }
+            
+            const compareBtn = cardEl.querySelector('.btn-compare');
+            const isSelected = laptopsToCompare.includes(id);
+            compareBtn.classList.toggle('bg-blue-600', isSelected);
+            compareBtn.classList.toggle('text-white', isSelected);
+            compareBtn.classList.toggle('bg-gray-600/50', !isSelected);
+            compareBtn.classList.toggle('hover:bg-gray-600', !isSelected);
+            compareBtn.classList.toggle('text-gray-200', !isSelected);
+            compareBtn.textContent = isSelected ? 'Batal Bandingkan' : 'Bandingkan';
+            
+            updateComparisonBar();
+        };
+
+        const updateComparisonBar = () => {
+            if (laptopsToCompare.length > 0 && currentUser) {
+                comparisonBar.classList.remove('hidden');
+                compareCountEl.textContent = laptopsToCompare.length;
+                compareAvatarsEl.innerHTML = laptopsToCompare.map(id => { const laptop = laptops.find(l => l.id === id); return laptop ? `<div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-xs ring-2 ring-gray-800" title="${laptop.nama}">${laptop.nama.substring(0,1)}</div>` : ''; }).join('');
+                compareNowBtn.disabled = laptopsToCompare.length < 2;
+            } else {
+                comparisonBar.classList.add('hidden');
+            }
+        };
+
+        compareNowBtn.addEventListener('click', renderComparisonView);
+
+        onAuthStateChanged(auth, user => {
+            currentUser = user;
+            renderAuthUI();
+            unsubscribeSnapshot();
+
+            if (user) {
+                const laptopsCollectionRef = collection(db, 'users', user.uid, 'laptops');
+                unsubscribeSnapshot = onSnapshot(laptopsCollectionRef, (snapshot) => {
+                    laptops = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    renderApp();
+                    updateComparisonBar();
+                });
+            } else {
+                laptops = [];
+                laptopsToCompare = [];
+                renderAuthScreen();
+                updateComparisonBar();
+            }
+        });
+    </script>
+
+</body>
+</html>
